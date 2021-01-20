@@ -15,7 +15,7 @@ const RecordTable = ({ users, headers, properties }) => {
 
 			<Tbody>
 				{users.map((user) => (
-					<TableRow key={user.email} properties={properties} user={user} />
+					<TableRow key={user.Email} properties={properties} user={user} />
 				))}
 			</Tbody>
 		</Table>

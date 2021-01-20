@@ -14,6 +14,7 @@ import RecordTable from './components/RecordTable';
 import apiResponse from './records.json';
 
 import './App.css';
+import Pagination from './components/Pagination';
 
 const App = () => {
 	const filterOptionsRef = useRef(null);
@@ -115,10 +116,13 @@ const App = () => {
 				</Flex>
 
 				<RecordTable
-					users={filteredProfiles.slice(0, 20)}
+					users={filteredProfiles.slice(0, 1)}
+					// users={filteredProfiles.slice(0, 20)}
 					headers={tableHeaders}
 					properties={recordProperties}
 				/>
+
+				<Pagination totalPages={10} onChangePage={() => {}} />
 			</Box>
 		</div>
 	);
