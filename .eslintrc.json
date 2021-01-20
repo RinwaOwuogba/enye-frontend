@@ -1,0 +1,29 @@
+{
+	"env": {
+		"browser": true,
+		"es2020": true
+	},
+	"extends": [
+		"airbnb",
+		"airbnb/hooks",
+		"plugin:react/recommended",
+		"plugin:jsx-a11y/recommended",
+		"prettier",
+		"prettier/react"
+	],
+	"parserOptions": {
+		"ecmaFeatures": {
+			"jsx": true
+		},
+		"ecmaVersion": 12,
+		"sourceType": "module"
+	},
+	"rules": {
+		"react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+		"react/jsx-indent": [0],
+		"react/jsx-indent-props": [0],
+		"react/no-unescaped-entities": [0],
+		"react/prop-types": [0],
+		"arrow-body-style": [0]
+	}
+}
