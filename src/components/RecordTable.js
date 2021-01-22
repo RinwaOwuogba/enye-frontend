@@ -2,7 +2,7 @@ import React from 'react';
 import { Table, Thead, Tbody, Tr, Th } from '@chakra-ui/react';
 import TableRow from './TableRow';
 
-const RecordTable = ({ users = [], headers, properties }) => {
+const RecordTable = ({ users, headers, properties, setSelected }) => {
 	return (
 		<Table variant='simple'>
 			<Thead>
@@ -15,7 +15,12 @@ const RecordTable = ({ users = [], headers, properties }) => {
 
 			<Tbody>
 				{users.map((user) => (
-					<TableRow key={user.Email} properties={properties} user={user} />
+					<TableRow
+						onClick={() => setSelected(user)}
+						key={user.Email}
+						properties={properties}
+						user={user}
+					/>
 				))}
 			</Tbody>
 		</Table>

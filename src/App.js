@@ -1,21 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-	Box,
-	Flex,
-	Heading,
-	Input,
-	InputGroup,
-	InputLeftElement,
-	Text,
-} from '@chakra-ui/react';
-import { Search2Icon } from '@chakra-ui/icons';
+import { Box, Flex, Heading, Text } from '@chakra-ui/react';
 
 import RecordTable from './components/RecordTable';
-import Filter from './components/Filter';
 import Pagination from './components/Pagination';
+import TableFilterMenu from './components/TableFilterMenu';
 
 import apiResponse from './records.json';
+
 import './App.css';
+import ProfileDetails from './components/ProfileDetails';
 
 const constants = {
 	RECORDS_PER_PAGE: 20,
@@ -23,6 +16,7 @@ const constants = {
 
 const App = () => {
 	const filterOptionsRef = useRef(null);
+	const searchInputRef = useRef(null);
 
 	const [totalRecords, setTotalRecords] = useState([]);
 	const [filteredProfiles, setFilteredProfiles] = useState([]);
@@ -31,23 +25,36 @@ const App = () => {
 
 	const [activeFilters, setActiveFilters] = useState([]);
 	const [possibleFilters, setPossibleFilters] = useState([]);
+	const [stickyFilter, setStickyFilter] = useState(false);
 
-	const [stickyFilter, setFilterSticker] = useState(false);
+	const [selectedProfile, setSelectedProfile] = useState(null);
 
-	const tableHeaders = ['First Name', 'Last Name', 'Email', 'Payment Method'];
-	const recordProperties = ['FirstName', 'LastName', 'Email', 'PaymentMethod'];
+	const tableHeaders = [
+		'First Name',
+		'Last Name',
+		'Gender',
+		'Email',
+		'Payment Method',
+	];
+	const recordProperties = [
+		'FirstName',
+		'LastName',
+		'Gender',
+		'Email',
+		'PaymentMethod',
+	];
 
-	// handle disappearing shadow on filter options
+	// enable disappearing box shadow effect on filter options
 	useEffect(() => {
 		const intialFilterOptionsRef = filterOptionsRef.current;
 		const observer = new IntersectionObserver(
 			([element]) => {
 				if (element.intersectionRatio < 1 && !stickyFilter) {
-					setFilterSticker(true);
+					setStickyFilter(true);
 				}
 
 				if (element.intersectionRatio >= 1 && stickyFilter) {
-					setFilterSticker(false);
+					setStickyFilter(false);
 				}
 			},
 			{
@@ -55,14 +62,18 @@ const App = () => {
 			}
 		);
 
-		observer.observe(intialFilterOptionsRef);
+		if (intialFilterOptionsRef) {
+			observer.observe(intialFilterOptionsRef);
+		}
 
 		return () => {
-			observer.unobserve(intialFilterOptionsRef);
+			if (intialFilterOptionsRef) {
+				observer.unobserve(intialFilterOptionsRef);
+			}
 		};
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [stickyFilter, setFilterSticker]);
+	}, [setStickyFilter, stickyFilter, selectedProfile]);
 
 	// fetch records from api and paginate response
 	useEffect(() => {
@@ -96,7 +107,30 @@ const App = () => {
 		);
 	}, []);
 
-	const filterProfiles = (filters, profiles) => {
+	const applySearchText = (profiles, fields, searchText) => {
+		const matchingProfiles = profiles.filter((profile) => {
+			let isMatch = false;
+
+			fields.some((field) => {
+				if (
+					profile[field]
+						.toLocaleLowerCase()
+						.includes(searchText.toLocaleLowerCase())
+				) {
+					isMatch = true;
+					return true;
+				}
+
+				return false;
+			});
+
+			return isMatch;
+		});
+
+		return matchingProfiles;
+	};
+
+	const applyFilterOptions = (filters, profiles) => {
 		if (!filters.length) {
 			return profiles;
 		}
@@ -121,43 +155,46 @@ const App = () => {
 		return validProfiles;
 	};
 
-	const handleSearchChange = (event) => {
-		const searchText = event.target.value;
-
-		let newFilteredProfiles = totalRecords.filter(
-			(profile) =>
-				String(profile.FirstName)
-					.toLocaleLowerCase()
-					.includes(searchText.toLocaleLowerCase()) ||
-				String(profile.LastName)
-					.toLocaleLowerCase()
-					.includes(searchText.toLocaleLowerCase())
-		);
-
-		newFilteredProfiles = filterProfiles(activeFilters, newFilteredProfiles);
-
+	const resetCurrentProfiles = (availableProfiles) => {
 		const startIndexOfNextPage = constants.RECORDS_PER_PAGE * 0;
 		const endIndexOfNextPage = startIndexOfNextPage + 20;
-
-		setFilteredProfiles(newFilteredProfiles);
 
 		setCurrentPageNumber(1);
 		setCurrentProfiles(
-			filteredProfiles.slice(startIndexOfNextPage, endIndexOfNextPage)
+			availableProfiles.slice(startIndexOfNextPage, endIndexOfNextPage)
 		);
 	};
 
-	const handleApplyFilters = (newFilters) => {
-		const newFilteredProfiles = filterProfiles(newFilters, filteredProfiles);
+	const handleSearchChange = (searchText) => {
+		let newFilteredProfiles = applySearchText(
+			totalRecords,
+			['FirstName', 'LastName'],
+			searchText
+		);
+
+		newFilteredProfiles = applyFilterOptions(
+			activeFilters,
+			newFilteredProfiles
+		);
+
+		setFilteredProfiles(newFilteredProfiles);
+		resetCurrentProfiles(newFilteredProfiles);
+	};
+
+	const handleApplyNewFilters = (newFilters) => {
+		const searchText = searchInputRef.current.value;
+
+		let newFilteredProfiles = applySearchText(
+			totalRecords,
+			['FirstName', 'LastName'],
+			searchText
+		);
+
+		newFilteredProfiles = applyFilterOptions(newFilters, newFilteredProfiles);
 
 		setActiveFilters(newFilters);
 		setFilteredProfiles(newFilteredProfiles);
-
-		const startIndexOfNextPage = constants.RECORDS_PER_PAGE * 0;
-		const endIndexOfNextPage = startIndexOfNextPage + 20;
-
-		setCurrentPageNumber(1);
-		setCurrentProfiles(newFilteredProfiles.slice(0, endIndexOfNextPage));
+		resetCurrentProfiles(newFilteredProfiles);
 	};
 
 	const onChangePage = (pageNo) => {
@@ -174,6 +211,10 @@ const App = () => {
 		});
 	};
 
+	const showAllProfiles = () => {
+		setSelectedProfile(null);
+	};
+
 	return (
 		<div className='App'>
 			<header className='App-header'>
@@ -185,68 +226,58 @@ const App = () => {
 				</Heading>
 			</header>
 
-			<Text mt='2' px='5'>
-				Here's an overview of some of our users and some information about their
-				recent transactions
-			</Text>
-
-			<Flex
-				position='sticky'
-				top='-1'
-				w='100%'
-				bg='white'
-				px='5'
-				pt='4'
-				pb='3'
-				my='3'
-				ref={filterOptionsRef}
-				borderBottom={stickyFilter ? '1px' : ''}
-				borderColor='gray.200'
-				boxShadow={stickyFilter ? 'sm' : ''}
-				flexWrap='wrap'
-			>
-				<InputGroup maxW='300px' mr={['5px', '20px']} mb='10px'>
-					<InputLeftElement pointerEvents='none'>
-						<Search2Icon />
-					</InputLeftElement>
-					<Input
-						w='100%'
-						onChange={handleSearchChange}
-						placeholder='search by name'
-					/>
-				</InputGroup>
-				<Filter
-					possibleFilters={possibleFilters}
-					activeFilters={activeFilters}
-					handleApplyFiters={handleApplyFilters}
-				/>
-			</Flex>
-
-			<Box mt='5' px='5'>
-				<Flex justify='space-between' my='3' color='gray.500' wrap='wrap'>
-					<Text mb='2'>Showing 1-20 records per page</Text>
-					<Text mb='2'>{`${totalRecords.length} user records / Page ${currentPageNumber}`}</Text>
-				</Flex>
-
-				<Box overflowX='auto'>
-					<RecordTable
-						users={currentProfiles}
-						headers={tableHeaders}
-						properties={recordProperties}
+			{selectedProfile ? (
+				<Box px='5'>
+					<ProfileDetails
+						profile={selectedProfile}
+						showAllProfiles={showAllProfiles}
 					/>
 				</Box>
+			) : (
+				<>
+					<Text mt='2' px='5'>
+						Here's an overview of some of our users and some of their recent
+						transactions
+					</Text>
 
-				<Box my='5'>
-					<Pagination
-						totalPages={Math.ceil(
-							filteredProfiles.length / constants.RECORDS_PER_PAGE
-						)}
-						onChangePage={onChangePage}
-						currentPageNumber={currentPageNumber}
-						setCurrentPageNumber={setCurrentPageNumber}
+					<TableFilterMenu
+						filterOptionsRef={filterOptionsRef}
+						stickyFilter={stickyFilter}
+						handleSearchChange={handleSearchChange}
+						searchInputRef={searchInputRef}
+						possibleFilters={possibleFilters}
+						activeFilters={activeFilters}
+						handleApplyNewFilters={handleApplyNewFilters}
 					/>
-				</Box>
-			</Box>
+
+					<Box mt='5' px='5'>
+						<Flex justify='space-between' my='3' color='gray.500' wrap='wrap'>
+							<Text mb='2'>Showing 1-20 records per page</Text>
+							<Text mb='2'>{`${totalRecords.length} total records / Page ${currentPageNumber}`}</Text>
+						</Flex>
+
+						<Box overflowX='auto'>
+							<RecordTable
+								users={currentProfiles}
+								headers={tableHeaders}
+								properties={recordProperties}
+								setSelected={setSelectedProfile}
+							/>
+						</Box>
+
+						<Box my='5'>
+							<Pagination
+								totalPages={Math.ceil(
+									filteredProfiles.length / constants.RECORDS_PER_PAGE
+								)}
+								onChangePage={onChangePage}
+								currentPageNumber={currentPageNumber}
+								setCurrentPageNumber={setCurrentPageNumber}
+							/>
+						</Box>
+					</Box>
+				</>
+			)}
 		</div>
 	);
 };

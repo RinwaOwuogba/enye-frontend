@@ -7,7 +7,6 @@ const Pagination = ({
 	setCurrentPageNumber,
 	onChangePage,
 }) => {
-	console.log('🚀 ~ file: Pagination.js ~ line 10 ~ totalPages', totalPages);
 	let pagesToDisplay = [];
 
 	const handlePageChange = (nextPage) => {
