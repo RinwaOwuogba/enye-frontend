@@ -2,7 +2,7 @@ import React from 'react';
 import { Table, Thead, Tbody, Tr, Th } from '@chakra-ui/react';
 import TableRow from './TableRow';
 
-const RecordTable = ({ users, headers, properties }) => {
+const RecordTable = ({ users = [], headers, properties }) => {
 	return (
 		<Table variant='simple'>
 			<Thead>

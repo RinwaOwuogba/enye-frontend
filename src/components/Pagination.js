@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button, Container, Flex, Text } from '@chakra-ui/react';
 
-const Pagination = ({ totalPages, onChangePage }) => {
-	const [currentPageNumber, setCurrentPageNumber] = useState(1);
-
+const Pagination = ({
+	totalPages,
+	currentPageNumber,
+	setCurrentPageNumber,
+	onChangePage,
+}) => {
 	let pagesToDisplay = [];
 
 	const handlePageChange = (nextPage) => {
@@ -52,6 +55,7 @@ const Pagination = ({ totalPages, onChangePage }) => {
 					<Button
 						mr='5px'
 						variant='outline'
+						colorScheme='green'
 						onClick={() => handlePageChange(currentPageNumber - 1)}
 					>
 						<Text>{'<'}</Text>
@@ -62,6 +66,7 @@ const Pagination = ({ totalPages, onChangePage }) => {
 					<Button
 						mr='5px'
 						key={pageNo + Math.random()}
+						colorScheme='green'
 						variant={pageNo === currentPageNumber ? 'solid' : 'outline'}
 						onClick={() => handlePageChange(pageNo)}
 					>
@@ -73,6 +78,7 @@ const Pagination = ({ totalPages, onChangePage }) => {
 					<Button
 						mr='5px'
 						variant='outline'
+						colorScheme='green'
 						onClick={() => handlePageChange(currentPageNumber + 1)}
 					>
 						<Text>{'>'}</Text>

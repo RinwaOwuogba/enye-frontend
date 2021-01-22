@@ -1,8 +1,7 @@
+/* .App {
+	overflow-x: hidden;
+} */
+
 header {
 	padding: 0 1rem 1rem 1rem;
-}
-
-.search-container {
-	background-color: #fff;
-	max-width: 25rem;
 }
