@@ -1,14 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Flex, Heading, Text } from '@chakra-ui/react';
+import { Box, Flex, Heading, Icon, Text } from '@chakra-ui/react';
+import { RiMoneyDollarCircleFill } from 'react-icons/ri';
 
 import RecordTable from './components/RecordTable';
 import Pagination from './components/Pagination';
 import TableFilterMenu from './components/TableFilterMenu';
+import ProfileDetails from './components/ProfileDetails';
 
 import apiResponse from './records.json';
 
 import './App.css';
-import ProfileDetails from './components/ProfileDetails';
 
 const constants = {
 	RECORDS_PER_PAGE: 20,
@@ -136,17 +137,17 @@ const App = () => {
 		}
 
 		const validProfiles = profiles.filter((profile) => {
-			let isMatch = false;
+			let isMatch = true;
 
-			// check if profile property value matches any active
-			// filter options
-			filters.some((filter) => {
-				if (filter.options.includes(profile[filter.keyName])) {
-					isMatch = true;
-					return true;
+			// check if profile property value doesn't match any active
+			// filter option
+			filters.every((filter) => {
+				if (!filter.options.includes(profile[filter.keyName])) {
+					isMatch = false;
+					return false;
 				}
 
-				return false;
+				return true;
 			});
 
 			return isMatch;
@@ -218,12 +219,16 @@ const App = () => {
 	return (
 		<div className='App'>
 			<header className='App-header'>
-				<Heading
-					mt='5'
-					fontSize={{ base: '1.5rem', md: '1.7rem', lg: '2rem ' }}
-				>
-					Transax
-				</Heading>
+				<Flex mt='5' alignItems='center'>
+					<Heading
+						mr='2'
+						color='green.400'
+						fontSize={{ base: '1.5rem', md: '1.7rem', lg: '2rem ' }}
+					>
+						Transax
+					</Heading>
+					<Icon as={RiMoneyDollarCircleFill} h={10} w={10} fill='green.400' />
+				</Flex>
 			</header>
 
 			{selectedProfile ? (

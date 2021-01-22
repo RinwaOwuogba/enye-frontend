@@ -34,7 +34,7 @@ const ProfileDetails = ({ profile, showAllProfiles }) => {
 
 	return (
 		<Box>
-			<Button variant='ghost' onClick={showAllProfiles}>
+			<Button variant='ghost' colorScheme='green' onClick={showAllProfiles}>
 				<ArrowBackIcon w={6} h={6} />
 			</Button>
 
@@ -45,7 +45,10 @@ const ProfileDetails = ({ profile, showAllProfiles }) => {
 							<FormLabel fontWeight='600' color='gray.600'>
 								{property}
 							</FormLabel>
-							<Input defaultValue={profile[property.split(' ').join('')]} />
+							<Input
+								defaultValue={profile[property.split(' ').join('')]}
+								focusBorderColor='green.300'
+							/>
 						</FormControl>
 					))}
 				</Box>
