@@ -96,10 +96,35 @@ const App = () => {
 		);
 	}, []);
 
+	const filterProfiles = (filters, profiles) => {
+		if (!filters.length) {
+			return profiles;
+		}
+
+		const validProfiles = profiles.filter((profile) => {
+			let isMatch = false;
+
+			// check if profile property value matches any active
+			// filter options
+			filters.some((filter) => {
+				if (filter.options.includes(profile[filter.keyName])) {
+					isMatch = true;
+					return true;
+				}
+
+				return false;
+			});
+
+			return isMatch;
+		});
+
+		return validProfiles;
+	};
+
 	const handleSearchChange = (event) => {
 		const searchText = event.target.value;
 
-		const newFilteredProfiles = totalRecords.filter(
+		let newFilteredProfiles = totalRecords.filter(
 			(profile) =>
 				String(profile.FirstName)
 					.toLocaleLowerCase()
@@ -109,9 +134,30 @@ const App = () => {
 					.includes(searchText.toLocaleLowerCase())
 		);
 
-		// apply filters
+		newFilteredProfiles = filterProfiles(activeFilters, newFilteredProfiles);
+
+		const startIndexOfNextPage = constants.RECORDS_PER_PAGE * 0;
+		const endIndexOfNextPage = startIndexOfNextPage + 20;
 
 		setFilteredProfiles(newFilteredProfiles);
+
+		setCurrentPageNumber(1);
+		setCurrentProfiles(
+			filteredProfiles.slice(startIndexOfNextPage, endIndexOfNextPage)
+		);
+	};
+
+	const handleApplyFilters = (newFilters) => {
+		const newFilteredProfiles = filterProfiles(newFilters, filteredProfiles);
+
+		setActiveFilters(newFilters);
+		setFilteredProfiles(newFilteredProfiles);
+
+		const startIndexOfNextPage = constants.RECORDS_PER_PAGE * 0;
+		const endIndexOfNextPage = startIndexOfNextPage + 20;
+
+		setCurrentPageNumber(1);
+		setCurrentProfiles(newFilteredProfiles.slice(0, endIndexOfNextPage));
 	};
 
 	const onChangePage = (pageNo) => {
@@ -172,7 +218,7 @@ const App = () => {
 				<Filter
 					possibleFilters={possibleFilters}
 					activeFilters={activeFilters}
-					setActiveFilters={setActiveFilters}
+					handleApplyFiters={handleApplyFilters}
 				/>
 			</Flex>
 

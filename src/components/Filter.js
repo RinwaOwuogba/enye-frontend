@@ -17,19 +17,24 @@ import {
 } from '@chakra-ui/react';
 import { FaFilter } from 'react-icons/fa';
 
-const Filter = ({ possibleFilters, activeFilters, setActiveFilters }) => {
+const Filter = ({ possibleFilters, activeFilters, handleApplyFiters }) => {
 	const handleFiltersSubmit = (event) => {
 		event.preventDefault();
 
-		const newActiveFilters = possibleFilters.map((filter) => {
+		const newActiveFilters = possibleFilters.reduce((acc, filter) => {
 			const formElement = event.target.elements[filter.keyName];
 
-			return {
-				[filter.keyName]: [formElement.value],
-			};
-		});
+			if (!formElement.value) {
+				return acc;
+			}
 
-		setActiveFilters(newActiveFilters);
+			return acc.concat({
+				...filter,
+				options: [formElement.value],
+			});
+		}, []);
+
+		handleApplyFiters(newActiveFilters);
 	};
 
 	return (
