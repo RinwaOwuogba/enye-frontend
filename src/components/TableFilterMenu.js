@@ -5,12 +5,14 @@ import {
 	Input,
 	InputGroup,
 	InputLeftElement,
+	Skeleton,
 } from '@chakra-ui/react';
 import { Search2Icon } from '@chakra-ui/icons';
 
 import Filter from './Filter';
 
 const TableFilterMenu = ({
+	isLoading,
 	filterOptionsRef,
 	stickyFilter,
 	handleSearchChange,
@@ -46,23 +48,27 @@ const TableFilterMenu = ({
 				mb='10px'
 				onSubmit={handleSearchSubmit}
 			>
-				<InputGroup maxW='300px'>
-					<InputLeftElement pointerEvents='none'>
-						<Search2Icon />
-					</InputLeftElement>
-					<Input
-						w='100%'
-						placeholder='search by name'
-						ref={searchInputRef}
-						name='searchRecords'
-					/>
-				</InputGroup>
+				<Skeleton isLoaded={!isLoading}>
+					<InputGroup maxW='300px'>
+						<InputLeftElement pointerEvents='none'>
+							<Search2Icon />
+						</InputLeftElement>
+						<Input
+							w='100%'
+							placeholder='search by name'
+							ref={searchInputRef}
+							name='searchRecords'
+						/>
+					</InputGroup>
+				</Skeleton>
 			</Box>
-			<Filter
-				possibleFilters={possibleFilters}
-				activeFilters={activeFilters}
-				handleApplyFiters={handleApplyNewFilters}
-			/>
+			<Skeleton isLoaded={!isLoading}>
+				<Filter
+					possibleFilters={possibleFilters}
+					activeFilters={activeFilters}
+					handleApplyFiters={handleApplyNewFilters}
+				/>
+			</Skeleton>
 		</Flex>
 	);
 };
