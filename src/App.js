@@ -81,7 +81,7 @@ const App = () => {
 
 		fetch(url)
 			.then((response) => {
-				if (response.ok) {
+				if (!response.ok) {
 					return response.json();
 				}
 
