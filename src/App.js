@@ -7,12 +7,11 @@ import Pagination from './components/Pagination';
 import TableFilterMenu from './components/TableFilterMenu';
 import ProfileDetails from './components/ProfileDetails';
 
-import apiResponse from './records.json';
-
 import './App.css';
 
 const constants = {
 	RECORDS_PER_PAGE: 20,
+	API_URL: 'https://api.enye.tech/v1/challenge/records',
 };
 
 const App = () => {
@@ -78,34 +77,49 @@ const App = () => {
 
 	// fetch records from api and paginate response
 	useEffect(() => {
-		// set possible filters based on available options
-		const genderOptions = new Set(
-			apiResponse.records.profiles.map((profile) => profile.Gender)
-		);
-		const paymentMethodOptions = new Set(
-			apiResponse.records.profiles.map((profile) => profile.PaymentMethod)
-		);
+		const url = constants.API_URL;
 
-		const filters = [
-			{
-				title: 'Gender',
-				keyName: 'Gender',
-				options: [...genderOptions],
-			},
-			{
-				title: 'Payment method',
-				keyName: 'PaymentMethod',
-				options: [...paymentMethodOptions],
-			},
-		];
-		setPossibleFilters(filters);
+		fetch(url)
+			.then((response) => {
+				if (response.ok) {
+					return response.json();
+				}
 
-		// set profiles
-		setTotalRecords(apiResponse.records.profiles);
-		setFilteredProfiles(apiResponse.records.profiles);
-		setCurrentProfiles(
-			apiResponse.records.profiles.slice(0, constants.RECORDS_PER_PAGE)
-		);
+				throw new Error();
+			})
+			.then((data) => {
+				// set possible filters based on available options
+				const genderOptions = new Set(
+					data.records.profiles.map((profile) => profile.Gender)
+				);
+				const paymentMethodOptions = new Set(
+					data.records.profiles.map((profile) => profile.PaymentMethod)
+				);
+
+				const filters = [
+					{
+						title: 'Gender',
+						keyName: 'Gender',
+						options: [...genderOptions],
+					},
+					{
+						title: 'Payment method',
+						keyName: 'PaymentMethod',
+						options: [...paymentMethodOptions],
+					},
+				];
+				setPossibleFilters(filters);
+
+				// set profiles
+				setTotalRecords(data.records.profiles);
+				setFilteredProfiles(data.records.profiles);
+				setCurrentProfiles(
+					data.records.profiles.slice(0, constants.RECORDS_PER_PAGE)
+				);
+			})
+			.catch((error) => {
+				console.log(error);
+			});
 	}, []);
 
 	const applySearchText = (profiles, fields, searchText) => {
@@ -239,49 +253,51 @@ const App = () => {
 					/>
 				</Box>
 			) : (
-				<>
-					<Text mt='2' px='5'>
-						Here's an overview of some of our users and some of their recent
-						transactions
-					</Text>
+				totalRecords.length && (
+					<>
+						<Text mt='2' px='5'>
+							Here's an overview of some of our users and some of their recent
+							transactions
+						</Text>
 
-					<TableFilterMenu
-						filterOptionsRef={filterOptionsRef}
-						stickyFilter={stickyFilter}
-						handleSearchChange={handleSearchChange}
-						searchInputRef={searchInputRef}
-						possibleFilters={possibleFilters}
-						activeFilters={activeFilters}
-						handleApplyNewFilters={handleApplyNewFilters}
-					/>
+						<TableFilterMenu
+							filterOptionsRef={filterOptionsRef}
+							stickyFilter={stickyFilter}
+							handleSearchChange={handleSearchChange}
+							searchInputRef={searchInputRef}
+							possibleFilters={possibleFilters}
+							activeFilters={activeFilters}
+							handleApplyNewFilters={handleApplyNewFilters}
+						/>
 
-					<Box mt='5' px='5'>
-						<Flex justify='space-between' my='3' color='gray.500' wrap='wrap'>
-							<Text mb='2'>Showing 1-20 records per page</Text>
-							<Text mb='2'>{`${totalRecords.length} total records / Page ${currentPageNumber}`}</Text>
-						</Flex>
+						<Box mt='5' px='5'>
+							<Flex justify='space-between' my='3' color='gray.500' wrap='wrap'>
+								<Text mb='2'>Showing 1-20 records per page</Text>
+								<Text mb='2'>{`${totalRecords.length} total records / Page ${currentPageNumber}`}</Text>
+							</Flex>
 
-						<Box overflowX='auto'>
-							<RecordTable
-								users={currentProfiles}
-								headers={tableHeaders}
-								properties={recordProperties}
-								setSelected={setSelectedProfile}
-							/>
+							<Box overflowX='auto'>
+								<RecordTable
+									users={currentProfiles}
+									headers={tableHeaders}
+									properties={recordProperties}
+									setSelected={setSelectedProfile}
+								/>
+							</Box>
+
+							<Box my='5'>
+								<Pagination
+									totalPages={Math.ceil(
+										filteredProfiles.length / constants.RECORDS_PER_PAGE
+									)}
+									onChangePage={onChangePage}
+									currentPageNumber={currentPageNumber}
+									setCurrentPageNumber={setCurrentPageNumber}
+								/>
+							</Box>
 						</Box>
-
-						<Box my='5'>
-							<Pagination
-								totalPages={Math.ceil(
-									filteredProfiles.length / constants.RECORDS_PER_PAGE
-								)}
-								onChangePage={onChangePage}
-								currentPageNumber={currentPageNumber}
-								setCurrentPageNumber={setCurrentPageNumber}
-							/>
-						</Box>
-					</Box>
-				</>
+					</>
+				)
 			)}
 		</div>
 	);
